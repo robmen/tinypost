@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PosterApi", "PosterApi\PosterApi.csproj", "{DC30D33F-9CBF-4206-AA26-A316D0D0C120}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PosterApi.test", "PosterApi.test\PosterApi.test.csproj", "{5B4EFB29-19DA-49CE-A082-AA9E9B5C7BDA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tinypost", "tinypost\tinypost.csproj", "{F969F823-D779-48DF-8F8B-23FC531288B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC30D33F-9CBF-4206-AA26-A316D0D0C120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC30D33F-9CBF-4206-AA26-A316D0D0C120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC30D33F-9CBF-4206-AA26-A316D0D0C120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC30D33F-9CBF-4206-AA26-A316D0D0C120}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B4EFB29-19DA-49CE-A082-AA9E9B5C7BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B4EFB29-19DA-49CE-A082-AA9E9B5C7BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B4EFB29-19DA-49CE-A082-AA9E9B5C7BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B4EFB29-19DA-49CE-A082-AA9E9B5C7BDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F969F823-D779-48DF-8F8B-23FC531288B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F969F823-D779-48DF-8F8B-23FC531288B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F969F823-D779-48DF-8F8B-23FC531288B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F969F823-D779-48DF-8F8B-23FC531288B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
