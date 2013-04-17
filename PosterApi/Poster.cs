@@ -1,4 +1,8 @@
-﻿namespace PosterApi
+﻿// <copyright file="Poster.cs" company="RobMensching.com LLC">
+//    Copyright (c) RobMensching.com LLC.  All rights reserved.
+// </copyright>
+
+namespace PosterApi
 {
     using System;
     using System.Collections.Generic;
@@ -15,38 +19,39 @@
         {
             this.PublishAt = publishAt;
 
-            this.PostsFolderName = "Posts";
-            this.PublishFolderName = "Publish";
-            this.WorkingFolderName = "Working" + " " + this.PublishAt.ToString("yyyy-MM-ddTHH.mm.ss");
+            this.PostsRelativePath = "Posts";
+            this.PublishRelativePath = "Publish";
+            this.WorkingRelativePath = "Working" + " " + this.PublishAt.ToString("yyyy-MM-ddTHH.mm.ss");
         }
 
-        public string PostsFolderName { get; set; }
+        public string PostsRelativePath { get; set; }
 
-        public string PublishFolderName { get; set; }
+        public string PublishRelativePath { get; set; }
 
-        public string WorkingFolderName { get; set; }
+        public string WorkingRelativePath { get; set; }
 
         public DateTime PublishAt { get; set; }
 
         public IEnumerable<Document> Process(string baseFolder)
         {
-            string publishFolder = Path.Combine(baseFolder, this.PublishFolderName);
-            string workingFolder = Path.Combine(baseFolder, this.WorkingFolderName);
-            string postsFolder = Path.Combine(baseFolder, this.PostsFolderName);
+            string publishFolder = Path.Combine(baseFolder, this.PublishRelativePath);
+            string workingFolder = Path.Combine(baseFolder, this.WorkingRelativePath);
+            string postsFolder = Path.Combine(baseFolder, this.PostsRelativePath);
 
-            IEnumerable<Document> docs = FindReadyDocuments(publishFolder);
-            docs = MoveToWorkingFolder(workingFolder, docs);
-            docs = Post(postsFolder, docs);
+            IEnumerable<Document> docs = FindPublishableDocuments(publishFolder);
+            docs = MoveDocumentsToWorkingFolder(workingFolder, docs);
+            docs = PostDocuments(postsFolder, docs);
 
             CleanWorkingFolder(workingFolder);
 
             return docs;
         }
 
-        public IEnumerable<Document> FindReadyDocuments(string publishFolder)
+        public IEnumerable<Document> FindPublishableDocuments(string publishPath)
         {
             List<Document> documents = new List<Document>();
-            DirectoryInfo folder = new DirectoryInfo(publishFolder);
+
+            DirectoryInfo folder = new DirectoryInfo(publishPath);
             if (folder.Exists)
             {
                 foreach (FileInfo file in folder.EnumerateFiles("*.md"))
@@ -56,7 +61,7 @@
                         using (FileStream stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
                         {
                             Document doc = new Document(file.FullName).Load(stream);
-                            if (doc.Date <= this.PublishAt)
+                            if (!doc.Date.HasValue || doc.Date <= this.PublishAt)
                             {
                                 documents.Add(doc);
                             }
@@ -72,9 +77,9 @@
             return documents;
         }
 
-        public IEnumerable<Document> MoveToWorkingFolder(string workingFolder, IEnumerable<Document> docs)
+        public IEnumerable<Document> MoveDocumentsToWorkingFolder(string workingPath, IEnumerable<Document> docs)
         {
-            DirectoryInfo folder = new DirectoryInfo(workingFolder);
+            DirectoryInfo folder = new DirectoryInfo(workingPath);
             if (!folder.Exists)
             {
                 folder.Create();
@@ -94,20 +99,20 @@
             return moved;
         }
 
-        public IEnumerable<Document> Post(string publishFolder, IEnumerable<Document> docs)
+        public IEnumerable<Document> PostDocuments(string postsPath, IEnumerable<Document> docs)
         {
-            DirectoryInfo folder = new DirectoryInfo(publishFolder);
+            DirectoryInfo folder = new DirectoryInfo(postsPath);
             if (!folder.Exists)
             {
                 folder.Create();
             }
 
-            List<Document> published = new List<Document>();
+            List<Document> posted = new List<Document>();
             foreach (Document doc in docs)
             {
-                string location;
-                doc.Published = this.Publish(doc.AuthorName, doc.AuthorEmail, doc.Title, doc.Slug, doc.Date, doc.Text, doc.RenderedText, doc.Tags, out location);
-                doc.Location = doc.Location;
+                PublishResult result = this.Publish(doc.AuthorName, doc.AuthorEmail, doc.Title, doc.Slug, doc.Date, doc.Text, doc.RenderedText, doc.Tags);
+                doc.Id = result.Id;
+                doc.Published = result.Published;
 
                 string newFile = String.Concat(doc.Published.Value.ToString("yyyy-MM-dd"), " ", Path.GetFileName(doc.Path));
                 string newPath = Path.Combine(folder.FullName, newFile);
@@ -117,12 +122,14 @@
                     doc.Save(writer);
                 }
 
+                // Saved posted document, delete the original.
                 File.Delete(doc.Path);
                 doc.Path = newPath;
-                published.Add(doc);
+
+                posted.Add(doc);
             }
 
-            return published;
+            return posted;
         }
 
         public void CleanWorkingFolder(string workingFolder)
@@ -133,14 +140,17 @@
             }
             catch (IOException)
             {
-                // TODO: print message.
+                // TODO: send warning message.
             }
         }
 
-        protected virtual DateTime Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags, out string location)
+        protected virtual PublishResult Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
         {
-            location = null;
-            return date.HasValue ? date.Value : DateTime.Now;
+            return new PublishResult()
+            {
+                Id = null,
+                Published = DateTime.MinValue,
+            };
         }
     }
 }

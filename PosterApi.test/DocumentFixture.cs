@@ -1,4 +1,8 @@
-﻿namespace PosterApi.test
+﻿// <copyright file="DocumentFixture.cs" company="RobMensching.com LLC">
+//    Copyright (c) RobMensching.com LLC.  All rights reserved.
+// </copyright>
+
+namespace PosterApi.test
 {
     using System;
     using System.IO;

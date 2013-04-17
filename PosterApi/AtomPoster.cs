@@ -1,4 +1,8 @@
-﻿namespace PosterApi
+﻿// <copyright file="AtomPoster.cs" company="RobMensching.com LLC">
+//    Copyright (c) RobMensching.com LLC.  All rights reserved.
+// </copyright>
+
+namespace PosterApi
 {
     using System;
     using System.IO;
@@ -30,18 +34,21 @@
 
         public string Password { get; set; }
 
-        protected override DateTime Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags, out string location)
+        protected override PublishResult Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
         {
             XElement entryXml = CreateEntryXml(author, email, title, date, html, tags);
             byte[] entryBytes = Encoding.UTF8.GetBytes(entryXml.ToString());
 
-            WebRequest request = WebRequest.Create(this.Uri);
+            HttpWebRequest request = WebRequest.Create(this.Uri) as HttpWebRequest;
 
             // Set credentials
             if (!String.IsNullOrEmpty(this.Username))
             {
-                var credentials = new CredentialCache();
-                credentials.Add(new Uri(this.Uri.GetLeftPart(UriPartial.Authority)), "Digest", new NetworkCredential(this.Username, this.Password));
+                Uri authorityUri = new Uri(this.Uri.GetLeftPart(UriPartial.Authority));
+
+                CredentialCache credentials = new CredentialCache();
+                credentials.Add(authorityUri, "Basic", new NetworkCredential(this.Username, this.Password));
+                credentials.Add(authorityUri, "Digest", new NetworkCredential(this.Username, this.Password));
 
                 request.Credentials = credentials;
             }
@@ -53,6 +60,7 @@
             }
 
             // Content to send.
+            request.Method = "POST";
             request.ContentType = AtompubContentType;
             request.ContentLength = entryBytes.Length;
 
@@ -67,10 +75,11 @@
                 throw new ApplicationException("Failed to post entry to server.");
             }
 
-            location = response.Headers["Location"];
-            DateTime updated = DateTime.Parse(entryXml.Element(AtomNamespace + "updated").Value);
-
-            return updated;
+            return new PublishResult()
+            {
+                Id = response.Headers["Location"],
+                Published = DateTime.Parse(entryXml.Element(AtomNamespace + "updated").Value),
+            };
         }
 
         public XElement CreateEntryXml(string author, string email, string title, DateTime? date, string html, string[] tags)

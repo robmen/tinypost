@@ -1,4 +1,8 @@
-﻿namespace PosterApi
+﻿// <copyright file="Document.cs" company="RobMensching.com LLC">
+//    Copyright (c) RobMensching.com LLC.  All rights reserved.
+// </copyright>
+
+namespace PosterApi
 {
     using System;
     using System.IO;
@@ -22,7 +26,7 @@
 
         public DateTime? Date { get; set; }
 
-        public string Location { get; set; }
+        public string Id { get; set; }
 
         public bool Post { get; set; }
 
@@ -74,7 +78,7 @@
                             break;
 
                         case "location":
-                            this.Location = value;
+                            this.Id = value;
                             break;
 
                         case "post":
@@ -163,9 +167,9 @@
                 header = true;
             }
 
-            if (!String.IsNullOrEmpty(this.Location))
+            if (!String.IsNullOrEmpty(this.Id))
             {
-                writer.WriteLine("location: {0}", this.Location);
+                writer.WriteLine("location: {0}", this.Id);
                 header = true;
             }
 
