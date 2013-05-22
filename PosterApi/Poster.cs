@@ -32,9 +32,12 @@ namespace PosterApi
 
         public DateTime PublishAt { get; set; }
 
+        public bool PrefixSuccessfulPostWithDate { get; set; }
+
         public IEnumerable<Document> Process(string baseFolder)
         {
-            string publishFolder = Path.Combine(baseFolder, this.PublishRelativePath);
+            string publishFolder = baseFolder;
+            //string publishFolder = Path.Combine(baseFolder, this.PublishRelativePath);
             string workingFolder = Path.Combine(baseFolder, this.WorkingRelativePath);
             string postsFolder = Path.Combine(baseFolder, this.PostsRelativePath);
 
@@ -110,13 +113,17 @@ namespace PosterApi
             List<Document> posted = new List<Document>();
             foreach (Document doc in docs)
             {
-                PublishResult result = this.Publish(doc.AuthorName, doc.AuthorEmail, doc.Title, doc.Slug, doc.Date, doc.Text, doc.RenderedText, doc.Tags);
+                PublishResult result = this.Publish(doc.Id, doc.AuthorName, doc.AuthorEmail, doc.Title, doc.Slug, doc.Date, doc.Text, doc.RenderedText, doc.Tags);
                 doc.Id = result.Id;
                 doc.Published = result.Published;
 
-                string newFile = String.Concat(doc.Published.Value.ToString("yyyy-MM-dd"), " ", Path.GetFileName(doc.Path));
-                string newPath = Path.Combine(folder.FullName, newFile);
+                string newFile = Path.GetFileName(doc.Path);
+                if (this.PrefixSuccessfulPostWithDate)
+                {
+                    newFile = String.Concat(doc.Published.Value.ToString("yyyy-MM-dd"), " ", newFile);
+                }
 
+                string newPath = Path.Combine(folder.FullName, newFile);
                 using (StreamWriter writer = new StreamWriter(newPath))
                 {
                     doc.Save(writer);
@@ -144,7 +151,7 @@ namespace PosterApi
             }
         }
 
-        protected virtual PublishResult Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
+        protected virtual PublishResult Publish(string location, string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
         {
             return new PublishResult()
             {

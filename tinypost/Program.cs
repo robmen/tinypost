@@ -2,7 +2,7 @@
 //    Copyright (c) RobMensching.com LLC.  All rights reserved.
 // </copyright>
 
-namespace poster
+namespace RobMensching.TinyPost
 {
     using System;
     using System.Collections.Generic;
@@ -12,48 +12,40 @@ namespace poster
     {
         public static void Main(string[] args)
         {
-            Poster poster = null;
-            string path = ".";
+            Poster poster;
+            string path;
 
-            for (int i = 0; i < args.Length; ++i)
+            try
             {
-                if (args[i].Equals("atom", StringComparison.OrdinalIgnoreCase))
+                CommandLine cmdline = CommandLine.Parse(args);
+                path = cmdline.Path ?? ".";
+
+                if (cmdline.Type == PosterType.Atom)
                 {
-                    Uri uri = new Uri(args[++i]);
-                    string username = null;
-                    string password = null;
-                    if (args[i + 1].Equals("-u", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ++i;
-                        username = args[++i];
-                    }
-
-                    if (args[i + 1].Equals("-p", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ++i;
-                        password = args[++i];
-                    }
-
-                    poster = new AtomPoster(uri, username, password);
+                    poster = new AtomPoster(cmdline.Uri, cmdline.User, cmdline.Password);
+                }
+                else if (cmdline.Type == PosterType.Zendesk)
+                {
+                    poster = new ZendeskPoster(cmdline.Subdomain, cmdline.User, cmdline.Password);
                 }
                 else
                 {
-                    path = args[i];
+                    throw new ApplicationException("Unknown action type.");
                 }
             }
-
-            if (poster == null)
+            catch (ApplicationException e)
             {
+                Console.WriteLine(e.Message);
                 return;
             }
 
             IEnumerable<Document> posted = poster.Process(path);
             foreach (var doc in posted)
             {
-                Console.WriteLine("Posted: {1}\r\nat: {2}\r\nfrom: {0}\r\n", doc.Path, doc.Title, doc.Published);
+                Console.WriteLine("Posted: {1}\r\n at: {2}\r\n from: {0}\r\n", doc.Path, doc.Title, doc.Published);
             }
 
-            //Console.ReadKey(false);
+            Console.ReadKey(false);
         }
     }
 }

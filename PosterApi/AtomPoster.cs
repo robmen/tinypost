@@ -23,6 +23,8 @@ namespace PosterApi
         public AtomPoster(Uri uri, string username, string password, DateTime publishAt) :
             base(publishAt)
         {
+            this.PrefixSuccessfulPostWithDate = true;
+
             this.Uri = uri;
             this.Username = username;
             this.Password = password;
@@ -34,12 +36,23 @@ namespace PosterApi
 
         public string Password { get; set; }
 
-        protected override PublishResult Publish(string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
+        protected override PublishResult Publish(string location, string author, string email, string title, string slug, DateTime? date, string text, string html, string[] tags)
         {
+            bool create = true;
+            if (String.IsNullOrEmpty(location))
+            {
+                location = this.Uri.AbsoluteUri;
+            }
+            else
+            {
+                create = false;
+            }
+
+            Uri uri = new Uri(location);
             XElement entryXml = CreateEntryXml(author, email, title, date, html, tags);
             byte[] entryBytes = Encoding.UTF8.GetBytes(entryXml.ToString());
 
-            HttpWebRequest request = WebRequest.Create(this.Uri) as HttpWebRequest;
+            HttpWebRequest request = WebRequest.Create(uri) as HttpWebRequest;
 
             // Set credentials
             if (!String.IsNullOrEmpty(this.Username))
@@ -60,7 +73,7 @@ namespace PosterApi
             }
 
             // Content to send.
-            request.Method = "POST";
+            request.Method = create ? "POST" : "PUT";
             request.ContentType = AtompubContentType;
             request.ContentLength = entryBytes.Length;
 
@@ -77,7 +90,7 @@ namespace PosterApi
 
             return new PublishResult()
             {
-                Id = response.Headers["Location"],
+                Id = response.Headers["Location"] ?? location,
                 Published = DateTime.Parse(entryXml.Element(AtomNamespace + "updated").Value),
             };
         }

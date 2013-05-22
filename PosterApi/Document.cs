@@ -99,6 +99,9 @@ namespace PosterApi
                             this.Title = value;
                             break;
 
+                        case "published":
+                            break;
+
                         default:
                             throw new ApplicationException(String.Format("Unexpected header tag: {0}", key));
                     }
