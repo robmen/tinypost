@@ -1,14 +1,11 @@
 ﻿namespace RobMensching.TinyPost
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security;
-    using System.Text;
 
     public enum PosterType
     {
         Unknown,
+        Help,
         Atom,
         Zendesk,
     };
@@ -20,8 +17,6 @@
         public string Path { get; set; }
 
         public string Subdomain { get; set; }
-
-        public int UnpublishedForumId { get; set; }
 
         public Uri Uri { get; set; }
 
@@ -48,8 +43,14 @@
                             commandLine.Type = PosterType.Zendesk;
                             break;
 
+                        case "help":
+                        case "-?":
+                        case "/?":
+                            commandLine.Type = PosterType.Help;
+                            break;
+
                         default:
-                            throw new ApplicationException(String.Format("Unknown action: {0}", arg));
+                            throw new ApplicationException(String.Format("Unknown action: '{0}'. Valid actions are: atom or zendesk.", arg));
                     }
                 }
                 else if (arg.StartsWith("-") || arg.StartsWith("/"))
@@ -98,10 +99,30 @@
             }
             else if (commandLine.Type == PosterType.Zendesk && commandLine.Subdomain == null)
             {
-                throw new ApplicationException("zendesk requires a subdomain to post to.");
+                throw new ApplicationException("zendesk requires a sub-domain to post to.");
             }
 
             return commandLine;
+        }
+
+        public static void Help(string error = null)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("  tinypost.exe [atom|zendesk] [-u username] [-p password] uri [path]");
+            Console.WriteLine("    atom    - posts to an atompub end-point at uri.");
+            Console.WriteLine("    zendesk - posts to an sub-domain on Zendesk at uri");
+            Console.WriteLine("");
+
+            if (!String.IsNullOrEmpty(error))
+            {
+                ConsoleColor original = Console.ForegroundColor;
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(error);
+
+                Console.ForegroundColor = original;
+                Console.WriteLine("");
+            }
         }
     }
 }

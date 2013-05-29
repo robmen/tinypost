@@ -6,6 +6,8 @@ namespace RobMensching.TinyPost
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Reflection;
     using PosterApi;
 
     public class Program
@@ -14,6 +16,8 @@ namespace RobMensching.TinyPost
         {
             Poster poster;
             string path;
+
+            Program.Header();
 
             try
             {
@@ -30,12 +34,13 @@ namespace RobMensching.TinyPost
                 }
                 else
                 {
-                    throw new ApplicationException("Unknown action type.");
+                    CommandLine.Help();
+                    return;
                 }
             }
             catch (ApplicationException e)
             {
-                Console.WriteLine(e.Message);
+                CommandLine.Help(e.Message);
                 return;
             }
 
@@ -46,6 +51,28 @@ namespace RobMensching.TinyPost
             }
 
             Console.ReadKey(false);
+        }
+
+        private static void Header()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersion = FileVersionInfo.GetVersionInfo(assembly.Location);
+            AssemblyProductAttribute product = Program.GetAttribute<AssemblyProductAttribute>(assembly);
+            AssemblyCopyrightAttribute copyright = Program.GetAttribute<AssemblyCopyrightAttribute>(assembly);
+
+            Console.WriteLine("{0} version {1}", product.Product, fileVersion.FileVersion);
+            Console.WriteLine(copyright.Copyright);
+        }
+
+        private static T GetAttribute<T>(Assembly assembly) where T : Attribute
+        {
+            object[] customAttributes = assembly.GetCustomAttributes(typeof(T), false);
+            if (null != customAttributes && 0 < customAttributes.Length)
+            {
+                return customAttributes[0] as T;
+            }
+
+            return null;
         }
     }
 }
