@@ -9,10 +9,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("tinypost")]
+[assembly: AssemblyTitle("tinyPost")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("RobMensching.com LLC")]
-[assembly: AssemblyProduct("tinypost")]
+[assembly: AssemblyProduct("tinyPost")]
 [assembly: AssemblyCopyright("Copyright (c) RobMensching.com LLC. All rights reserved.")]
 
 [assembly: AssemblyVersion("1.0.0.0")]
