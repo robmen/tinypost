@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLine.cs" />
@@ -42,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PosterApi\PosterApi.csproj">
@@ -54,7 +56,9 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <MakeDir Directories="$(TargetDir)merged" />
+    <Exec Command="&quot;$(MSBuildThisFileDirectory)..\packages\ILMerge.2.13.0307\ILMerge.exe&quot; /wildcards /out:&quot;$(TargetDir)merged\$(TargetFileName)&quot; &quot;$(TargetPath)&quot; &quot;$(TargetDir)*.dll&quot;" />
+  </Target>
 </Project>
