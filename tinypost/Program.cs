@@ -50,7 +50,9 @@ namespace RobMensching.TinyPost
                 Console.WriteLine("Posted: {1}\r\n at: {2}\r\n from: {0}\r\n", doc.Path, doc.Title, doc.Published);
             }
 
+#if DEBUG
             Console.ReadKey(false);
+#endif
         }
 
         private static void Header()
